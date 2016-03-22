@@ -1,4 +1,7 @@
 import ComputationalGeometry.*;
+import peasy.*;
+
+PeasyCam camera;
 
 IsoSkeleton skeleton;
 GlitchP5 glitchP5;
@@ -17,6 +20,8 @@ float newLineTickness, newJoinTickness;
 int amplitude;
 int rotDirection = 1;
 
+PVector lights[];
+float lightStrength;
 
 
 //    _____    ______   ______   __  __   ____ 
@@ -29,6 +34,7 @@ void setup() {
   size(800, 600, P3D);
   frameRate(25);
   background(5);
+  camera = new PeasyCam(this, 300);
 
   glitchP5 = new GlitchP5(this);
   skeleton = createRandomSkeleton(10);
@@ -38,6 +44,8 @@ void setup() {
   lineTickness = 1;
   joinTickness = 0;
   amplitude = TREE;
+
+  populateLights();
 }
 
 
@@ -47,7 +55,7 @@ void setup() {
 //   / / / /  / /_/ /  / /| |  | | /| / / 
 //  / /_/ /  / _, _/  / ___ |  | |/ |/ /  
 // /_____/  /_/ |_|  /_/  |_|  |__/|__/   
-
+float zm=0, sp = 0;
 void draw() {
   if (!glitchP5.done()) {
     aPastePlane(true);
@@ -69,19 +77,16 @@ void draw() {
     aClearBG();
   }
 
-  // lights();
-  ambientLight(128, 128, 128);
-  directionalLight(128, 128, 128, 0, 2, -1);
-  lightFalloff(1, 0, 1);
-  lightSpecular(0, 1, 0);
-
-  float zm = 80;
-  float sp = speed * frameCount;
-  camera(zm * cos(sp) , 
-         zm * sin(sp) * rotDirection, 
-         zm, 
-         0, 0, 0, 
-         0, 0, -1);
+  zm = 80;
+  sp = speed * frameCount;
+  // camera(zm * cos(sp) , 
+  //        zm * sin(sp) * rotDirection, 
+  //        zm, 
+  //        0, 0, 0, 
+  //        0, 0, -1);
+  // camera.rotateX(zm * cos(sp));
+  // camera.rotateY(zm * sin(sp) * rotDirection);
+  // camera.rotateZ(zm);
   
   //noStroke();
   stroke(0,10);
@@ -89,8 +94,28 @@ void draw() {
   fill(frameCount%250, 
        50, 
        100);  
-       
+
+  // lights();
+    ambientLight(128, 128, 128);
+
+  for(int i=0; i<lights.length; i++) {
+    directionalLight(lightStrength, lightStrength, lightStrength, lights[i].x, lights[i].y, lights[i].z);
+  }
+
+  // if (randomGaussian()-1.8 > 0)
+  //   directionalLight(80, 50, 50, 50, 0, 1);
+  // else
+  //   directionalLight(108, 108, 108, 0, 2, -1);
+
+  lightFalloff(1, 0, 1);
+  lightSpecular(0, 1, 0);
+
+  pushMatrix();
+  rotateX(zm * cos(sp) );
+  rotateY(zm * sin(sp) * rotDirection);
+  rotateZ(zm);
   skeleton.plot(lineTickness, joinTickness);
+  popMatrix();
 
   console.draw();
   glitchP5.run();
@@ -208,3 +233,13 @@ IsoSkeleton createRandomSkeleton(int size, int amplitude) {
   
   return newSkeleton;
 }
+
+void populateLights() {
+  lights = new PVector[(int)random(3,7)];
+  for(int i=0; i<lights.length; i++) {
+    lightStrength = random(TWO_PI);
+    lights[i] = new PVector(cos(lightStrength), 0.3, sin(lightStrength));
+  }
+  lightStrength = random(120,180);
+}
+
