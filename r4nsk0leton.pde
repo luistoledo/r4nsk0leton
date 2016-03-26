@@ -23,7 +23,8 @@ float newLineTickness, newJoinTickness;
 int amplitude;
 int rotDirection = 1;
 int strokew;
-int zoom, newZoom;;
+int zoom, newZoom;
+boolean vibration;
 
 PVector lights[];
 float lightStrength;
@@ -58,6 +59,7 @@ void setup() {
   amplitude = TREE;
   lightning = false;
   strokew = 1;
+  vibration = false;;
 
   populateLights();
 }
@@ -76,10 +78,17 @@ void draw() {
   }
 
   if (frameCount % 1000 <= 0) {
+    console.log("randomize tickness");
     aRandomizeTickness();
   }
-  lineTickness = lerp(lineTickness, newLineTickness, 0.001);
-  joinTickness = lerp(joinTickness, newJoinTickness, 0.001);
+  if (vibration && frameCount % 2 <= 0) {
+    newLineTickness = lineTickness + random(-0.01,0.01);
+    newJoinTickness = joinTickness + random(-0.5,0.5);
+  }
+  constrain(newLineTickness, 0, 0.2);
+  constrain(newJoinTickness, 0, 5);
+  lineTickness = lerp(lineTickness, newLineTickness, vibration?0.5:0.001);
+  joinTickness = lerp(joinTickness, newJoinTickness, vibration?0.5:0.001);
 
   if (frameCount % (3 * 60 * 25) <= 0) {
     aRunGlitch();
@@ -93,20 +102,11 @@ void draw() {
 
   zm = 10;
   sp = speed * frameCount;
-  // camera(zm * cos(sp) , 
-  //        zm * sin(sp) * rotDirection, 
-  //        zm, 
-  //        0, 0, 0, 
-  //        0, 0, -1);
-  // camera.rotateX(zm * cos(sp));
-  // camera.rotateY(zm * sin(sp) * rotDirection);
-  // camera.rotateZ(zm);
   
   if (abs(zoom-newZoom)>0.1)
-    zoom = (int)lerp (zoom, newZoom, 0.1);
+    zoom = (int)lerp (zoom, newZoom, 0.05);
   camera.setDistance(zoom);
 
-  //noStroke();
   stroke(0,10);
   strokeWeight(strokew);
   colorMode(HSB);
@@ -114,8 +114,8 @@ void draw() {
        50, 
        100);  
 
-  // lights();
-    ambientLight(128, 128, 128);
+  lights();
+    // ambientLight(128, 128, 128);
 
   for(int i=0; i<lights.length; i++) {
     directionalLight(lightStrength, lightStrength, lightStrength, lights[i].x, lights[i].y, lights[i].z);
@@ -126,15 +126,19 @@ void draw() {
       directionalLight(80, 50, 50, 50, 0, 1);
     else
       directionalLight(108, 108, 108, 0, 2, -1);
+  
+    lightFalloff(1, 0, 1);
+    lightSpecular(0, 1, 0);
   }
 
-  lightFalloff(1, 0, 1);
-  lightSpecular(0, 1, 0);
-
   pushMatrix();
-  rotateX(zm * cos(sp) );
-  rotateY(zm * sin(sp) * rotDirection);
-  rotateZ(zm);
+  camera.setRotations( zm * cos(sp),
+                       zm * sin(sp) * rotDirection,
+                       zm);
+
+  // rotateX(zm * cos(sp) );
+  // rotateY(zm * sin(sp) * rotDirection);
+  // rotateZ(zm);
   skeleton.plot(lineTickness, joinTickness);
   popMatrix();
 
@@ -215,6 +219,14 @@ void aSetZoom(int z) {
   console.log("zzzzoooooooommm");
   newZoom = z;
 }
+void aToggleVibration() {
+  if (vibration) aSetVibration(false);
+  else aSetVibration(true);
+}
+void aSetVibration(boolean v) {
+  console.log((vibration?"must":"not") +" vibrate!");
+  vibration = v;
+}
 
 
 
@@ -242,6 +254,9 @@ void keyPressed() {
   }
   if (key == 'l') {
     aToggleLightning();
+  }
+  if (key == 'f') {
+    fullScreen();
   }
 }
 
@@ -282,7 +297,7 @@ IsoSkeleton createRandomSkeleton(int size, int amplitude) {
 }
 
 void populateLights() {
-  lights = new PVector[(int)random(3,7)];
+  lights = new PVector[(int)random(2,4)];
   for(int i=0; i<lights.length; i++) {
     lightStrength = random(TWO_PI);
     lights[i] = new PVector(cos(lightStrength), 0.3, sin(lightStrength));
