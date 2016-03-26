@@ -1,7 +1,10 @@
 import ComputationalGeometry.*;
 import peasy.*;
+import controlP5.*;
 
 PeasyCam camera;
+
+ControlFrame cw;
 
 IsoSkeleton skeleton;
 GlitchP5 glitchP5;
@@ -19,9 +22,12 @@ float lineTickness, joinTickness;
 float newLineTickness, newJoinTickness;
 int amplitude;
 int rotDirection = 1;
+int strokew;
+int zoom, newZoom;;
 
 PVector lights[];
 float lightStrength;
+boolean lightning;
 
 
 //    _____    ______   ______   __  __   ____ 
@@ -30,11 +36,17 @@ float lightStrength;
 //  ___/ /  / /___     / /    / /_/ /  / ____/ 
 // /____/  /_____/    /_/     \____/  /_/      
 
-void setup() {
+void settings() {
   size(800, 600, P3D);
+}
+
+void setup() {
+  cw = new ControlFrame(this);
+
   frameRate(25);
   background(5);
   camera = new PeasyCam(this, 300);
+  zoom = 190; newZoom = 190;
 
   glitchP5 = new GlitchP5(this);
   skeleton = createRandomSkeleton(10);
@@ -44,6 +56,8 @@ void setup() {
   lineTickness = 1;
   joinTickness = 0;
   amplitude = TREE;
+  lightning = false;
+  strokew = 1;
 
   populateLights();
 }
@@ -77,7 +91,7 @@ void draw() {
     aClearBG();
   }
 
-  zm = 80;
+  zm = 10;
   sp = speed * frameCount;
   // camera(zm * cos(sp) , 
   //        zm * sin(sp) * rotDirection, 
@@ -88,10 +102,15 @@ void draw() {
   // camera.rotateY(zm * sin(sp) * rotDirection);
   // camera.rotateZ(zm);
   
+  if (abs(zoom-newZoom)>0.1)
+    zoom = (int)lerp (zoom, newZoom, 0.1);
+  camera.setDistance(zoom);
+
   //noStroke();
   stroke(0,10);
+  strokeWeight(strokew);
   colorMode(HSB);
-  fill(frameCount%250, 
+  fill(frameCount%255, 
        50, 
        100);  
 
@@ -102,10 +121,12 @@ void draw() {
     directionalLight(lightStrength, lightStrength, lightStrength, lights[i].x, lights[i].y, lights[i].z);
   }
 
-  // if (randomGaussian()-1.8 > 0)
-  //   directionalLight(80, 50, 50, 50, 0, 1);
-  // else
-  //   directionalLight(108, 108, 108, 0, 2, -1);
+  if (lightning) {
+    if (randomGaussian()-1.8 > 0)
+      directionalLight(80, 50, 50, 50, 0, 1);
+    else
+      directionalLight(108, 108, 108, 0, 2, -1);
+  }
 
   lightFalloff(1, 0, 1);
   lightSpecular(0, 1, 0);
@@ -130,26 +151,29 @@ void draw() {
 // \____/   \____/  /_/ |_/    /_/    /_/ |_|   \____/  /_____/
 
 void aNewSkeleton(){
-  console.log("fire: new skeleton");
+  console.log("A new skeleton");
   skeleton = createRandomSkeleton(60, amplitude);
   rotDirection *= -1;
 }
 void aClearBG(){
-  console.log("fire: clear background");
   color bg = (random(1)>0.5) ? color(10,0,50) : 0;
-  background(bg);
+  aClearBG(bg);
+}
+void aClearBG(int bgg){
+  console.log("clear background");
+  this.background(bgg);
 }
 void aPastePlane(boolean b){
-  console.log("fire: paste plane");
+  // console.log("fire: paste plane");
   aPastePlane();
 }
 void aPastePlane(){
   noStroke();
   fill(200,100,100,100);
-  rect(0,0,width,height);
+  rect(-width/4, -height/3, width,height);
 }
 void aRunGlitch(){
-  console.log("fire: glitch");
+  console.log("glitch");
   glitchP5.glitch((int)random(0,width), (int)random(0,height), 
                   200, 400, 
                   200, 1200, 
@@ -157,19 +181,39 @@ void aRunGlitch(){
   rotDirection *= -1;
 }
 void aAmplitudeUp(){
-  console.log("fire: shaping stones");
+  console.log("stones to be");
   amplitude = STONE;
   aRandomizeTickness();
 }
 void aAmplitudeDown(){
-  console.log("fire: shaping trees");
+  console.log("shaping trees");
   amplitude = TREE;
   aRandomizeTickness();
 }
 void aRandomizeTickness(){
-  console.log("fire: randomize tickness");
+  console.log("randomize tickness");
   newLineTickness = random(0, 5);
   newJoinTickness = random(0, 0.1);
+}
+void aLightningOn() {
+  console.log("lightning on");
+  lightning = true;
+}
+void aLightningOff() {
+  console.log("lightning is off");
+  lightning = false;
+}
+void aToggleLightning() {
+  if (lightning) aLightningOff();
+  else aLightningOn();
+}
+void aSetStrokeweight(int w) {
+  console.log(w + "stroke weight");
+  strokew = w;
+}
+void aSetZoom(int z) {
+  console.log("zzzzoooooooommm");
+  newZoom = z;
 }
 
 
@@ -195,6 +239,9 @@ void keyPressed() {
   }
   if (key == '2') {
     aAmplitudeDown();
+  }
+  if (key == 'l') {
+    aToggleLightning();
   }
 }
 

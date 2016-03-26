@@ -8,9 +8,9 @@ class ScreenConsole {
 
   void draw() {
     pushStyle();
-    fill(0, 50);
+    fill(0, 102, 53, 10);
     textSize(10);
-    text (buffer, 0, 0);
+    text (buffer, -width/10, -height/10);
     popStyle();
   }
 
