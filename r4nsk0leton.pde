@@ -24,7 +24,10 @@ int amplitude;
 int rotDirection = 1;
 int strokew;
 int zoom, newZoom;
+boolean manualCamera;
 boolean vibration;
+boolean blur, dilate, posterize;
+boolean cleanBG;
 
 PVector lights[];
 float lightStrength;
@@ -46,8 +49,8 @@ void setup() {
 
   frameRate(25);
   background(5);
-  camera = new PeasyCam(this, 300);
-  zoom = 190; newZoom = 190;
+  camera = new PeasyCam(this, 200);
+  zoom = 190; newZoom = 190; manualCamera = false;
 
   glitchP5 = new GlitchP5(this);
   skeleton = createRandomSkeleton(10);
@@ -59,7 +62,11 @@ void setup() {
   amplitude = TREE;
   lightning = false;
   strokew = 1;
-  vibration = false;;
+  vibration = false;
+  blur = false;
+  dilate = false;
+  posterize = false;
+  cleanBG = false;
 
   populateLights();
 }
@@ -75,6 +82,11 @@ float zm=0, sp = 0;
 void draw() {
   if (!glitchP5.done()) {
     aPastePlane(true);
+  }
+
+  if (cleanBG) {
+    cleanBG = false;
+    background(getCleanBGColor());
   }
 
   if (frameCount % 1000 <= 0) {
@@ -97,15 +109,27 @@ void draw() {
     aNewSkeleton();
   }
   if (frameCount % (5 * 60 * 25) <= 0) {
-    aClearBG();
+    aCleanBG();
+  }
+  if (frameCount % (3 * 60 * 25) <= 0) {
+    aToggleDilate();
+  } else {
+    // dilate = false;
+  }
+  if (frameCount % (3 * 60 * 25) <= 0) {
+  }
+  if (frameCount % (3 * 60 * 25) <= 0) {
   }
 
   zm = 10;
   sp = speed * frameCount;
   
-  if (abs(zoom-newZoom)>0.1)
+  // if (abs(zoom-newZoom)>0.1) {
     zoom = (int)lerp (zoom, newZoom, 0.05);
-  camera.setDistance(zoom);
+  // }
+  if (!manualCamera){
+    camera.setDistance(zoom);
+  }
 
   stroke(0,10);
   strokeWeight(strokew);
@@ -131,6 +155,14 @@ void draw() {
     lightSpecular(0, 1, 0);
   }
 
+  if (dilate)
+    filter(DILATE);
+
+  if (blur)
+    filter(BLUR, 2);
+
+  if (posterize)
+    filter(POSTERIZE, 10);
   pushMatrix();
   camera.setRotations( zm * cos(sp),
                        zm * sin(sp) * rotDirection,
@@ -159,13 +191,12 @@ void aNewSkeleton(){
   skeleton = createRandomSkeleton(60, amplitude);
   rotDirection *= -1;
 }
-void aClearBG(){
-  color bg = (random(1)>0.5) ? color(10,0,50) : 0;
-  aClearBG(bg);
+void aCleanBG(){
+  console.log("cristal clear shit");
+  cleanBG = true;
 }
-void aClearBG(int bgg){
-  console.log("clear background");
-  this.background(bgg);
+int getCleanBGColor() {
+  return (random(1)>0.5) ? color(10,0,50) : 0;
 }
 void aPastePlane(boolean b){
   // console.log("fire: paste plane");
@@ -199,17 +230,13 @@ void aRandomizeTickness(){
   newLineTickness = random(0, 5);
   newJoinTickness = random(0, 0.1);
 }
-void aLightningOn() {
-  console.log("lightning on");
-  lightning = true;
-}
-void aLightningOff() {
-  console.log("lightning is off");
-  lightning = false;
+void aSetLightning(boolean v) {
+  console.log(v?"lightning on":"lightning is off");
+  lightning = v;
 }
 void aToggleLightning() {
-  if (lightning) aLightningOff();
-  else aLightningOn();
+  if (lightning) aSetLightning(false);
+  else aSetLightning(true);
 }
 void aSetStrokeweight(int w) {
   console.log(w + "stroke weight");
@@ -227,6 +254,38 @@ void aSetVibration(boolean v) {
   console.log((vibration?"must":"not") +" vibrate!");
   vibration = v;
 }
+void aSetDilate(boolean v) {
+  console.log((v?"dilat£":"not d"));
+  dilate = v;
+}
+void aToggleDilate() {
+  if (dilate) aSetDilate(false);
+  else aSetDilate(true);
+}
+void aSetBlur(boolean v) {
+  console.log("bulr" + (blur?"YE$":"N0"));
+  blur = v;
+}
+void aToggleBlur() {
+  if (blur) aSetBlur(false);
+  else aSetBlur(true);
+}
+void aSetPosterize(boolean v) {
+  console.log((posterize?"Posterize":"posterize not"));
+  posterize = v;
+}
+void aTogglePosterize() {
+  if (posterize) aSetPosterize(false);
+  else aSetPosterize(true);
+}
+void aSetManualcamera(boolean v) {
+  console.log(manualCamera?"auto pilot":"you drive");
+  manualCamera = v;
+}
+void aToggleManualcamera() {
+  if (manualCamera) aSetManualcamera(false);
+  else aSetManualcamera(true);
+}
 
 
 
@@ -240,8 +299,8 @@ void keyPressed() {
   if (key == 'r') {
     aNewSkeleton();
   }
-  if (key == 'b') {
-    aClearBG();
+  if (key == 'c') {
+    aCleanBG();
   }
   if (key == 'g') {
     aRunGlitch();
@@ -255,8 +314,17 @@ void keyPressed() {
   if (key == 'l') {
     aToggleLightning();
   }
-  if (key == 'f') {
-    fullScreen();
+  if (key == 'v') {
+    aToggleVibration();
+  }
+  if (key == 'd') {
+    aToggleDilate();
+  }
+  if (key == 'b') {
+    aToggleBlur();
+  }
+  if (key == 'p') {
+    aTogglePosterize();
   }
 }
 
