@@ -1,6 +1,10 @@
 import ComputationalGeometry.*;
 import peasy.*;
 import controlP5.*;
+import ddf.minim.*;
+
+Minim minim;
+AudioInput audioInput;
 
 PeasyCam camera;
 
@@ -28,6 +32,7 @@ boolean manualCamera;
 boolean vibration;
 boolean blur, dilate, posterize;
 boolean cleanBG;
+boolean audioNoise;
 
 PVector lights[];
 float lightStrength;
@@ -49,12 +54,15 @@ void setup() {
 
   frameRate(25);
   background(5);
-  camera = new PeasyCam(this, 200);
+  camera = new PeasyCam(this, 100);
   zoom = 190; newZoom = 190; manualCamera = false;
 
   glitchP5 = new GlitchP5(this);
   skeleton = createRandomSkeleton(10);
   console = new ScreenConsole();
+
+  minim = new Minim(this);
+  audioInput = minim.getLineIn();
 
   speed = SUPERLOWSPEED;
   lineTickness = 1;
@@ -67,6 +75,7 @@ void setup() {
   dilate = false;
   posterize = false;
   cleanBG = false;
+  audioNoise = true;
 
   populateLights();
 }
@@ -102,6 +111,11 @@ void draw() {
   lineTickness = lerp(lineTickness, newLineTickness, vibration?0.5:0.001);
   joinTickness = lerp(joinTickness, newJoinTickness, vibration?0.5:0.001);
 
+  if (audioNoise) {
+      lineTickness += audioInput.left.get(1)/2;
+      joinTickness += audioInput.right.get(0)/10;
+  }
+
   if (frameCount % (3 * 60 * 25) <= 0) {
     aRunGlitch();
   }
@@ -113,8 +127,6 @@ void draw() {
   }
   if (frameCount % (3 * 60 * 25) <= 0) {
     aToggleDilate();
-  } else {
-    // dilate = false;
   }
   if (frameCount % (3 * 60 * 25) <= 0) {
   }
@@ -285,6 +297,14 @@ void aSetManualcamera(boolean v) {
 void aToggleManualcamera() {
   if (manualCamera) aSetManualcamera(false);
   else aSetManualcamera(true);
+}
+void aSetAudioinput(boolean v) {
+  console.log(v?"lets drone baby":"got bored");
+  audioNoise = v;
+}
+void aToggleAudioinput() {
+  if (audioNoise) aSetAudioinput(true);
+  else aSetAudioinput(false);
 }
 
 

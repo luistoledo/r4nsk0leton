@@ -27,8 +27,8 @@ class ControlFrame extends PApplet {
     cp5.addButton("reload_figure").setHeight(30).setColorBackground(color(0, 100, 50)).linebreak();
 
     cp5.addSlider("stroke").setRange(0, 10).setValue(1).setSize(200, 20).setNumberOfTickMarks(10).setSliderMode(Slider.FLEXIBLE).linebreak();
-    cp5.addSlider("jointTickness").setRange(0, 0.2).setValue(0.1).setSize(100, 20).setSliderMode(Slider.FLEXIBLE);
-    cp5.addSlider("armTickness").setRange(0, 5).setValue(1).setSize(100, 20).setSliderMode(Slider.FLEXIBLE).linebreak();
+    cp5.addSlider("join_t").setRange(0, 0.2).setValue(0.1).setSize(100, 20).setSliderMode(Slider.FLEXIBLE);
+    cp5.addSlider("arm_t").setRange(0, 5).setValue(1).setSize(100, 20).setSliderMode(Slider.FLEXIBLE).linebreak();
 
     cp5.addToggle("vibrate").setHeight(20);
     cp5.addToggle("lightning").setHeight(20);
@@ -36,6 +36,7 @@ class ControlFrame extends PApplet {
     cp5.addButton("glitch").setHeight(30);
     cp5.addButton("clear_bg").setHeight(30).linebreak();
 
+    cp5.addToggle("audioInput").setHeight(20);
     cp5.addToggle("blur").setHeight(20);
     cp5.addToggle("dilate").setHeight(20);
     cp5.addToggle("posterize").setHeight(20).linebreak();
@@ -50,6 +51,8 @@ class ControlFrame extends PApplet {
  
   void draw() {
     background(50);
+
+    // cp5.getController("dilate").setValue();
   }
 
   void quit() {
@@ -102,13 +105,17 @@ class ControlFrame extends PApplet {
     aSetVibration(v);
   }
 
-  void jointTickness(float v) {
+  void joint_t(float v) {
     newJoinTickness = v;
   }
 
-  void armTickness(float v) {
+  void arm_t(float v) {
     newLineTickness = v;
-  } 
+  }
+
+  void audioInput(boolean v) {
+    aSetAudioinput(v);
+  }
 
   void dilate(boolean v) {
     aSetDilate(v);
