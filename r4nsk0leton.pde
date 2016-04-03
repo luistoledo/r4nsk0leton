@@ -29,7 +29,7 @@ int rotDirection = 1;
 int strokew;
 int zoom, newZoom;
 boolean manualCamera;
-boolean vibration;
+boolean vibration; float xvib, yvib;
 boolean blur, dilate, posterize;
 boolean cleanBG;
 boolean audioNoise;
@@ -78,6 +78,7 @@ void setup() {
   audioNoise = true;
 
   populateLights();
+  colorMode(HSB);
 }
 
 
@@ -108,13 +109,8 @@ void draw() {
   }
   constrain(newLineTickness, 0, 0.2);
   constrain(newJoinTickness, 0, 5);
-  lineTickness = lerp(lineTickness, newLineTickness, vibration?0.5:0.001);
-  joinTickness = lerp(joinTickness, newJoinTickness, vibration?0.5:0.001);
-
-  if (audioNoise) {
-      lineTickness += audioInput.left.get(1)/2;
-      joinTickness += audioInput.right.get(0)/10;
-  }
+  lineTickness = lerp(lineTickness, newLineTickness, vibration?0.6:0.001);
+  joinTickness = lerp(joinTickness, newJoinTickness, vibration?0.6:0.001);
 
   if (frameCount % (3 * 60 * 25) <= 0) {
     aRunGlitch();
@@ -127,6 +123,7 @@ void draw() {
   }
   if (frameCount % (3 * 60 * 25) <= 0) {
     aToggleDilate();
+    cw.setDilate(dilate);
   }
   if (frameCount % (3 * 60 * 25) <= 0) {
   }
@@ -142,13 +139,6 @@ void draw() {
   if (!manualCamera){
     camera.setDistance(zoom);
   }
-
-  stroke(0,10);
-  strokeWeight(strokew);
-  colorMode(HSB);
-  fill(frameCount%255, 
-       50, 
-       100);  
 
   lights();
     // ambientLight(128, 128, 128);
@@ -175,15 +165,34 @@ void draw() {
 
   if (posterize)
     filter(POSTERIZE, 10);
+  
   pushMatrix();
+
+  if (vibration) {
+    translate( random(-3,3), random(-3,3), random(-3,3));
+  }
+
   camera.setRotations( zm * cos(sp),
                        zm * sin(sp) * rotDirection,
                        zm);
 
-  // rotateX(zm * cos(sp) );
-  // rotateY(zm * sin(sp) * rotDirection);
-  // rotateZ(zm);
+  stroke(0,10);
+  strokeWeight(strokew);
+  fill(frameCount%255,
+       50,
+       100);
+
+  if (audioNoise) noStroke();
+
   skeleton.plot(lineTickness, joinTickness);
+
+  if (audioNoise) {
+    noFill();
+    stroke(0, 20);
+    translate( audioInput.left.get(0)*100, audioInput.right.get(0)*100, audioInput.right.get(0)+audioInput.right.get(0)*100);
+    skeleton.plot(lineTickness, joinTickness);
+  }
+
   popMatrix();
 
   console.draw();
@@ -345,6 +354,9 @@ void keyPressed() {
   }
   if (key == 'p') {
     aTogglePosterize();
+  }
+  if (key == 'a') {
+    aToggleAudioinput();
   }
 }
 
