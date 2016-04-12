@@ -182,14 +182,15 @@ void draw() {
        50,
        100);
 
-  if (audioNoise) noStroke();
-
-  skeleton.plot(lineTickness, joinTickness);
-
   if (audioNoise) {
+    noStroke();
+    translate( audioInput.left.get(0)*10, audioInput.right.get(0)*10, (audioInput.right.get(2)+audioInput.left.get(2))*10);
+    skeleton.plot(lineTickness, joinTickness);
     noFill();
     stroke(0, 20);
-    translate( audioInput.left.get(0)*100, audioInput.right.get(0)*100, audioInput.right.get(0)+audioInput.right.get(0)*100);
+    translate( audioInput.left.get(0)*10, audioInput.right.get(0)*10, (audioInput.right.get(3)+audioInput.left.get(3))*10);
+    skeleton.plot(lineTickness, joinTickness);
+  } else {
     skeleton.plot(lineTickness, joinTickness);
   }
 
