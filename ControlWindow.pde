@@ -39,6 +39,7 @@ class ControlFrame extends PApplet {
     cp5.addToggle("audioInput").setHeight(20).setValue(true);
     cp5.addToggle("blur").setHeight(20);
     cp5.addToggle("dilate").setHeight(20);
+    cp5.addToggle("movie").setHeight(20).setValue(true);
     cp5.addToggle("posterize").setHeight(20).linebreak();
 
     // cp5.addSlider2D("camera").setMinMax(-10, 10, -10, 10);
@@ -51,8 +52,6 @@ class ControlFrame extends PApplet {
  
   void draw() {
     background(50);
-
-    // cp5.getController("dilate").setValue();
   }
 
   void quit() {
@@ -133,7 +132,9 @@ class ControlFrame extends PApplet {
     aSetManualcamera(v);
   }
 
-
+  void movie(boolean v) {
+    aSetShowVideo(v);
+  }
 
 
 

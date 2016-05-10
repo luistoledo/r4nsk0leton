@@ -2,6 +2,7 @@ import ComputationalGeometry.*;
 import peasy.*;
 import controlP5.*;
 import ddf.minim.*;
+import processing.video.*;
 
 Minim minim;
 AudioInput audioInput;
@@ -13,6 +14,8 @@ ControlFrame cw;
 IsoSkeleton skeleton;
 GlitchP5 glitchP5;
 ScreenConsole console;
+
+Movie bgVideo;
 
 float SUPERLOWSPEED  = 0.0005;
 float LOWSPEED  = 0.001;
@@ -33,6 +36,7 @@ boolean vibration; float xvib, yvib;
 boolean blur, dilate, posterize;
 boolean cleanBG;
 boolean audioNoise;
+boolean showBGVideo;
 
 PVector lights[];
 float lightStrength;
@@ -64,6 +68,9 @@ void setup() {
   minim = new Minim(this);
   audioInput = minim.getLineIn();
 
+  bgVideo = new Movie(this, "chinamoonlanding.mov");
+  bgVideo.loop();
+
   speed = SUPERLOWSPEED;
   lineTickness = 1;
   joinTickness = 0;
@@ -76,6 +83,7 @@ void setup() {
   posterize = false;
   cleanBG = false;
   audioNoise = true;
+  showBGVideo = true;
 
   populateLights();
   colorMode(HSB);
@@ -90,10 +98,22 @@ void setup() {
 // /_____/  /_/ |_|  /_/  |_|  |__/|__/   
 float zm=0, sp = 0;
 void draw() {
+  if (showBGVideo) {
+    hint(DISABLE_DEPTH_TEST);
+    camera.beginHUD();
+    pushStyle();
+    tint(255,1);
+    bgVideo.blend(0,0,width,height, 0,0,width,height, SOFT_LIGHT);
+    image(bgVideo, 0, 0, width, height);
+    popStyle();
+    camera.endHUD();
+    hint(ENABLE_DEPTH_TEST);
+  }
+
   if (!glitchP5.done()) {
     aPastePlane(true);
   }
-
+  
   if (cleanBG) {
     cleanBG = false;
     background(getCleanBGColor());
@@ -198,8 +218,13 @@ void draw() {
 
   console.draw();
   glitchP5.run();
+
 }
 
+void movieEvent(Movie m) {
+  if (showBGVideo)
+    m.read();
+}
 
 
 //    ______   ____     _   __   ______   ____     ____     __ 
@@ -316,7 +341,14 @@ void aToggleAudioinput() {
   if (audioNoise) aSetAudioinput(true);
   else aSetAudioinput(false);
 }
-
+void aSetShowVideo(boolean v) {
+  console.log(v?"China is landing":"3000BC");
+  showBGVideo = v;
+}
+void aToggleShowVideo() {
+  if (showBGVideo) aSetShowVideo(true);
+  else aSetShowVideo(false);
+}
 
 
 //     ____   _   __   ____     __  __   ______
@@ -405,4 +437,3 @@ void populateLights() {
   }
   lightStrength = random(120,180);
 }
-
